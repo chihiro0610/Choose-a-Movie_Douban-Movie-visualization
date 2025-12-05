@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电影数据可视化分析系统</title>
+    
+    <!-- 静态资源引用 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    
+    <!-- 内联数据区 -->
+    <script>
+        // 样例电影数据
+        const sampleMovies = [
+            {"MOVIE_ID": 3249999, "NAME": "林肯公园：革命之路", "DIRECTORS": "", "ACTORS": "查斯特·班宁顿/罗伯·波顿/布莱德·德尔森/菲尼克斯·法雷尔/约瑟夫·韩/麦克·信田", "GENRES": "歌舞", "DOUBAN_SCORE": 9.4, "YEAR": 2008},
+            {"MOVIE_ID": 26667648, "NAME": "九纹龙史进之除恶史家庄", "DIRECTORS": "刘信义", "ACTORS": "朱晓辉/淳于珊珊/耿懿", "GENRES": "剧情/武侠", "DOUBAN_SCORE": 6.4, "YEAR": 2016},
+            {"MOVIE_ID": 1477536, "NAME": "婼玛的十七岁", "DIRECTORS": "章家瑞", "ACTORS": "李敏/杨志刚", "GENRES": "剧情", "DOUBAN_SCORE": 7.0, "YEAR": 2003},
+            {"MOVIE_ID": 7052774, "NAME": "2011全美音乐大奖", "DIRECTORS": "", "ACTORS": "", "GENRES": "音乐", "DOUBAN_SCORE": 6.8, "YEAR": 2011},
+            {"MOVIE_ID": 1299558, "NAME": "第三类外星人", "DIRECTORS": "", "ACTORS": "玛瑞·亚达波Maryam d'Abo", "GENRES": "科幻/恐怖", "DOUBAN_SCORE": 6.0, "YEAR": 1983},
+            {"MOVIE_ID": 1307325, "NAME": "午夜巴塞罗那", "DIRECTORS": "伍迪·艾伦", "ACTORS": "丽贝卡·豪尔/斯嘉丽·约翰逊/哈维尔·巴登/佩内洛普·克鲁兹/克里斯·梅西纳", "GENRES": "剧情/爱情", "DOUBAN_SCORE": 7.8, "YEAR": 2008},
+            {"MOVIE_ID": 1307326, "NAME": "雨人", "DIRECTORS": "巴瑞·莱文森", "ACTORS": "达斯汀·霍夫曼/汤姆·克鲁斯/瓦莱莉·高利诺/邦尼·亨特", "GENRES": "剧情", "DOUBAN_SCORE": 8.7, "YEAR": 1988},
+            {"MOVIE_ID": 1307327, "NAME": "教父", "DIRECTORS": "弗朗西斯·福特·科波拉", "ACTORS": "马龙·白兰度/阿尔·帕西诺/詹姆斯·卡恩/罗伯特·杜瓦尔/黛安·基顿", "GENRES": "剧情/犯罪", "DOUBAN_SCORE": 9.3, "YEAR": 1972},
+            {"MOVIE_ID": 1307328, "NAME": "肖申克的救赎", "DIRECTORS": "弗兰克·德拉邦特", "ACTORS": "蒂姆·罗宾斯/摩根·弗里曼/鲍勃·冈顿/威廉姆·赛德勒/克兰西·布朗", "GENRES": "剧情/犯罪", "DOUBAN_SCORE": 9.7, "YEAR": 1994},
+            {"MOVIE_ID": 1307329, "NAME": "控方证人", "DIRECTORS": "比利·怀尔德", "ACTORS": "泰隆·鲍华/玛琳·黛德丽/查尔斯·劳顿/爱尔莎·兰切斯特/约翰·威廉姆斯", "GENRES": "剧情/犯罪/悬疑", "DOUBAN_SCORE": 9.6, "YEAR": 1957}
+        ];
+
+        // 样例评分数据
+        const sampleRatings = [
+            {"RATING_ID": 1359352573, "USER_MD5": "0ab7e3efacd56983f16503572d2b9915", "MOVIE_ID": 5113101, "RATING": 2, "RATING_TIME": "2018-09-05 19:42:07"},
+            {"RATING_ID": 1598245094, "USER_MD5": "84dfd3f91dd85ea105bc74a4f0d7a067", "MOVIE_ID": 5113101, "RATING": 1, "RATING_TIME": "2019-07-09 14:52:07"},
+            {"RATING_ID": 311937819, "USER_MD5": "c9a47fd59b55967ceac07cac6d5f270c", "MOVIE_ID": 3718526, "RATING": 3, "RATING_TIME": "2010-11-05 22:15:44"},
+            {"RATING_ID": 457663846, "USER_MD5": "18cbf971bdf17336056674bb8fad7ea2", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2011-11-14 22:31:02"},
+            {"RATING_ID": 313277849, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
+            {"RATING_ID": 313277850, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
+            {"RATING_ID": 313277851, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
+            {"RATING_ID": 313277852, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
+            {"RATING_ID": 313277853, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
+            {"RATING_ID": 313277854, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"}
+        ];
+
+        // 可视化数据
+        const visualizationData = {
+            genreDistribution: {
+                labels: ['剧情', '喜剧', '爱情', '惊悚', '动作', '犯罪', '恐怖', '悬疑', '动画', '冒险'],
+                data: [569, 230, 207, 187, 160, 121, 98, 80, 67, 65]
+            },
+            movieRatingDistribution: {
+                labels: ['0-1', '1-2', '2-3', '3-4', '4-5', '5-6', '6-7', '7-8', '8-9', '9-10'],
+                data: [0, 0, 16, 28, 64, 149, 312, 326, 96, 9]
+            },
+            userRatingDistribution: {
+                labels: ['1分', '2分', '3分', '4分', '5分'],
+                data: [56, 80, 284, 317, 263]
+            },
+            genreRatingRelation: {
+                labels: ['舞台艺术', '短片', '歌舞', '音乐', '戏曲', '传记', '历史', '动画', '西部', '运动', '家庭', '儿童', '战争', '剧情', '喜剧'],
+                data: [8.6, 8.2, 7.56, 7.48, 7.45, 7.44, 7.27, 7.26, 7.08, 7.01, 7.01, 7.0, 6.94, 6.92, 6.83],
+                counts: [2, 1, 22, 35, 2, 31, 26, 67, 8, 14, 43, 10, 43, 569, 230]
+            },
+            directorRatingRelation: {
+                labels: ['黑泽明', '是枝裕和', '张彻', '徐克', '查尔斯·维多', '楚原', '王晶', '朱延平', '罗维'],
+                data: [8.63, 7.47, 6.95, 6.87, 6.87, 6.75, 6.23, 6.15, 5.83],
+                counts: [3, 3, 6, 3, 3, 4, 3, 4, 3]
+            },
+            actorRatingRelation: {
+                labels: ['笠智众', '山崎努', '让娜·莫罗', '杰弗里·拉什', '安东尼·霍普金斯', '木村多江', '吉姆·卡维泽', '三船敏郎', '弗雷德里克·马奇', '米歇尔·西蒙'],
+                data: [8.37, 8.27, 8.15, 8.1, 8.03, 8.0, 7.93, 7.85, 7.8, 7.8],
+                counts: [3, 3, 4, 3, 3, 3, 3, 4, 3, 4]
+            },
+            cooperationNetwork: {
+                nodes: [
+                    {"id": "王钟", "group": 1}, {"id": "张彻", "group": 2}, {"id": "姜大卫", "group": 1},
+                    {"id": "曾志伟", "group": 1}, {"id": "朱延平", "group": 2}, {"id": "黄秋生", "group": 1},
+                    {"id": "王晶", "group": 2}, {"id": "时任步", "group": 1}, {"id": "川野浩司", "group": 2},
+                    {"id": "井淼", "group": 1}, {"id": "伍迪·艾伦", "group": 1}, {"id": "伍迪·艾伦", "group": 2},
+                    {"id": "三船敏郎", "group": 1}, {"id": "黑泽明", "group": 2}, {"id": "山崎努", "group": 1},
+                    {"id": "伯特·兰卡斯特", "group": 1}, {"id": "约翰·弗兰克海默", "group": 2}, {"id": "达斯汀·霍夫曼", "group": 1},
+                    {"id": "巴瑞·莱文森", "group": 2}, {"id": "阿尔·帕西诺", "group": 1}, {"id": "弗朗西斯·福特·科波拉", "group": 2},
+                    {"id": "蒂姆·罗宾斯", "group": 1}, {"id": "弗兰克·德拉邦特", "group": 2}, {"id": "泰隆·鲍华", "group": 1},
+                    {"id": "比利·怀尔德", "group": 2}, {"id": "克里斯托弗·诺兰", "group": 2}, {"id": "莱昂纳多·迪卡普里奥", "group": 1},
+                    {"id": "马丁·斯科塞斯", "group": 2}, {"id": "罗伯特·德尼罗", "group": 1}, {"id": "宫崎骏", "group": 2},
+                    {"id": "汤姆·汉克斯", "group": 1}, {"id": "史蒂文·斯皮尔伯格", "group": 2}, {"id": "布拉德·皮特", "group": 1},
+                    {"id": "昆汀·塔伦蒂诺", "group": 2}, {"id": "安吉丽娜·朱莉", "group": 1}, {"id": "克林特·伊斯特伍德", "group": 2},
+                    {"id": "约翰尼·德普", "group": 1}, {"id": "蒂姆·伯顿", "group": 2}, {"id": "梅丽尔·斯特里普", "group": 1},
+                    {"id": "罗伯特·泽米吉斯", "group": 2}
+                ],
+                links: [
+                    {"source": "王钟", "target": "张彻", "value": 3}, {"source": "姜大卫", "target": "张彻", "value": 3},
+                    {"source": "曾志伟", "target": "朱延平", "value": 2}, {"source": "黄秋生", "target": "王晶", "value": 2},
+                    {"source": "时任步", "target": "川野浩司", "value": 2}, {"source": "井淼", "target": "张彻", "value": 2},
+                    {"source": "伍迪·艾伦", "target": "伍迪·艾伦", "value": 2}, {"source": "三船敏郎", "target": "黑泽明", "value": 2},
+                    {"source": "山崎努", "target": "黑泽明", "value": 2}, {"source": "伯特·兰卡斯特", "target": "约翰·弗兰克海默", "value": 2},
+                    {"source": "达斯汀·霍夫曼", "target": "巴瑞·莱文森", "value": 2}, {"source": "阿尔·帕西诺", "target": "弗朗西斯·福特·科波拉", "value": 2},
+                    {"source": "蒂姆·罗宾斯", "target": "弗兰克·德拉邦特", "value": 2}, {"source": "泰隆·鲍华", "target": "比利·怀尔德", "value": 2},
+                    {"source": "莱昂纳多·迪卡普里奥", "target": "克里斯托弗·诺兰", "value": 2}, {"source": "莱昂纳多·迪卡普里奥", "target": "马丁·斯科塞斯", "value": 2},
+                    {"source": "罗伯特·德尼罗", "target": "马丁·斯科塞斯", "value": 2}, {"source": "汤姆·汉克斯", "target": "史蒂文·斯皮尔伯格", "value": 2},
+                    {"source": "布拉德·皮特", "target": "昆汀·塔伦蒂诺", "value": 2}, {"source": "安吉丽娜·朱莉", "target": "克林特·伊斯特伍德", "value": 2},
+                    {"source": "约翰尼·德普", "target": "蒂姆·伯顿", "value": 2}, {"source": "梅丽尔·斯特里普", "target": "罗伯特·泽米吉斯", "value": 2}
+                ]
+            }
+        };
+    </script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <!-- 顶部导航 -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-film text-2xl text-blue-600"></i>
+                    <h1 class="text-xl font-bold text-gray-900">电影数据可视化分析系统</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500">基于1000部电影和1000条评分数据</span>
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-white text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 概览卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">电影总数</p>
+                        <p class="text-2xl font-bold text-gray-900">1,000</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-video text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">评分总数</p>
+                        <p class="text-2xl font-bold text-gray-900">1,000</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-star text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">平均评分</p>
+                        <p class="text-2xl font-bold text-gray-900">6.65</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">用户总数</p>
+                        <p class="text-2xl font-bold text-gray-900">974</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-users text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 样例数据展示 -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-table text-blue-600 mr-2"></i>
+                样例数据展示
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 电影样例数据 -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">电影数据（前5条）</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-2">电影名称</th>
+                                    <th class="px-2 py-2">类型</th>
+                                    <th class="px-2 py-2">评分</th>
+                                    <th class="px-2 py-2">年份</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movieTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- 评分样例数据 -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">用户评分数据（前5条）</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-2">电影ID</th>
+                                    <th class="px-2 py-2">评分</th>
+                                    <th class="px-2 py-2">评分时间</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ratingTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据可视化图表 -->
+        <div class="grid grid-cols-1 gap-8 mb-8">
+            <!-- 电影类型分布 -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-bar text-blue-600 mr-2"></i>
+                    电影类型分布
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="genreChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 电影评分分布 -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-column text-green-600 mr-2"></i>
+                    电影评分分布
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="movieRatingChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 用户评分分布 -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-area text-purple-600 mr-2"></i>
+                    用户评分分布
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="userRatingChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 电影类型与评分关系 -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-orange-600 mr-2"></i>
+                    电影类型平均评分
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="genreRatingChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导演和演员分析 -->
+        <div class="grid grid-cols-1 gap-8 mb-8">
+            <!-- 导演评分关系 -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-user-tie text-red-600 mr-2"></i>
+                    导演平均评分（≥3部作品）
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="directorRatingChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 演员评分关系 -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-user-friends text-indigo-600 mr-2"></i>
+                    演员平均评分（≥3部作品）
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="actorRatingChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 演员-导演合作网络 -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-project-diagram text-teal-600 mr-2"></i>
+                演员-导演合作网络（合作≥2次）
+            </h3>
+            <div class="relative h-160">
+                <div id="networkChart" class="w-full h-full"></div>
+                <div class="absolute bottom-4 left-4 text-sm text-gray-500">
+                    <span class="inline-block w-3 h-3 bg-blue-500 rounded-full mr-1"></span> 演员
+                    <span class="inline-block w-3 h-3 bg-green-500 rounded-full ml-4 mr-1"></span> 导演
+                </div>
+            </div>
+        </div>
+
+    <script>
+        // 填充样例数据表格
+        function populateTables() {
+            // 电影表格
+            const movieTableBody = document.getElementById('movieTable');
+            sampleMovies.slice(0, 5).forEach(movie => {
+                const row = movieTableBody.insertRow();
+                row.innerHTML = `
+                    <td class="px-2 py-2 font-medium text-gray-900">${movie.NAME}</td>
+                    <td class="px-2 py-2">${movie.GENRES}</td>
+                    <td class="px-2 py-2">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            ${movie.DOUBAN_SCORE}
+                        </span>
+                    </td>
+                    <td class="px-2 py-2">${movie.YEAR}</td>
+                `;
+            });
+
+            // 评分表格
+            const ratingTableBody = document.getElementById('ratingTable');
+            sampleRatings.slice(0, 5).forEach(rating => {
+                const row = ratingTableBody.insertRow();
+                row.innerHTML = `
+                    <td class="px-2 py-2 font-medium text-gray-900">${rating.MOVIE_ID}</td>
+                    <td class="px-2 py-2">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            rating.RATING >= 4 ? 'bg-green-100 text-green-800' : 
+                            rating.RATING >= 3 ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-red-100 text-red-800'
+                        }">
+                            ${rating.RATING}星
+                        </span>
+                    </td>
+                    <td class="px-2 py-2 text-gray-500">${rating.RATING_TIME}</td>
+                `;
+            });
+        }
+
+        // 创建图表
+        function createCharts() {
+            // 电影类型分布柱状图
+            const genreCtx = document.getElementById('genreChart').getContext('2d');
+            new Chart(genreCtx, {
+                type: 'bar',
+                data: {
+                    labels: visualizationData.genreDistribution.labels,
+                    datasets: [{
+                        label: '电影数量',
+                        data: visualizationData.genreDistribution.data,
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 电影评分分布柱状图
+            const movieRatingCtx = document.getElementById('movieRatingChart').getContext('2d');
+            new Chart(movieRatingCtx, {
+                type: 'bar',
+                data: {
+                    labels: visualizationData.movieRatingDistribution.labels,
+                    datasets: [{
+                        label: '电影数量',
+                        data: visualizationData.movieRatingDistribution.data,
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 用户评分分布饼图
+            const userRatingCtx = document.getElementById('userRatingChart').getContext('2d');
+            new Chart(userRatingCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: visualizationData.userRatingDistribution.labels,
+                    datasets: [{
+                        data: visualizationData.userRatingDistribution.data,
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(245, 101, 101, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(59, 130, 246, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 电影类型与评分关系柱状图
+            const genreRatingCtx = document.getElementById('genreRatingChart').getContext('2d');
+            new Chart(genreRatingCtx, {
+                type: 'bar',
+                data: {
+                    labels: visualizationData.genreRatingRelation.labels,
+                    datasets: [{
+                        label: '平均评分',
+                        data: visualizationData.genreRatingRelation.data,
+                        backgroundColor: 'rgba(249, 115, 22, 0.8)',
+                        borderColor: 'rgba(249, 115, 22, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 导演评分关系柱状图
+            const directorRatingCtx = document.getElementById('directorRatingChart').getContext('2d');
+            new Chart(directorRatingCtx, {
+                type: 'bar',
+                data: {
+                    labels: visualizationData.directorRatingRelation.labels,
+                    datasets: [{
+                        label: '平均评分',
+                        data: visualizationData.directorRatingRelation.data,
+                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 演员评分关系柱状图
+            const actorRatingCtx = document.getElementById('actorRatingChart').getContext('2d');
+            new Chart(actorRatingCtx, {
+                type: 'bar',
+                data: {
+                    labels: visualizationData.actorRatingRelation.labels,
+                    datasets: [{
+                        label: '平均评分',
+                        data: visualizationData.actorRatingRelation.data,
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 创建演员-导演合作网络
+        function createNetworkChart() {
+            const width = document.getElementById('networkChart').clientWidth;
+            const height = 640;
+
+            const svg = d3.select('#networkChart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const simulation = d3.forceSimulation(visualizationData.cooperationNetwork.nodes)
+                .force('link', d3.forceLink(visualizationData.cooperationNetwork.links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-10))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(40));
+
+            // 创建连线
+            const link = svg.append('g')
+                .selectAll('line')
+                .data(visualizationData.cooperationNetwork.links)
+                .enter()
+                .append('line')
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.6)
+                .attr('stroke-width', d => Math.sqrt(d.value));
+
+            // 创建节点
+            const node = svg.append('g')
+                .selectAll('circle')
+                .data(visualizationData.cooperationNetwork.nodes)
+                .enter()
+                .append('circle')
+                .attr('r', 10)
+                .attr('fill', d => d.group === 1 ? '#3B82F6' : '#10B981')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+
+            // 添加文本标签
+            const text = svg.append('g')
+                .selectAll('text')
+                .data(visualizationData.cooperationNetwork.nodes)
+                .enter()
+                .append('text')
+                .text(d => d.id)
+                .attr('font-size', '10px')
+                .attr('dx', 12)
+                .attr('dy', 4)
+                .attr('fill', '#374151');
+
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                node
+                    .attr('cx', d => d.x = Math.max(40, Math.min(width - 40, d.x)))
+                    .attr('cy', d => d.y = Math.max(40, Math.min(height - 40, d.y)));
+
+                text
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y);
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            populateTables();
+            createCharts();
+            createNetworkChart();
+        });
+    </script>
+</body>
+</html>
