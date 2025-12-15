@@ -191,18 +191,23 @@ visualization_data['userRatingDistribution'] = {
 # 电影类型与评分关系数据（前15个类型）
 genre_ratings = {}
 for idx, row in movies_df.iterrows():
-    if pd.notna(row['GENRES']) and pd.notna(row['DOUBAN_SCORE']):
+    if pd.notna(row['GENRES']) and pd.notna(row['DOUBAN_SCORE']) and pd.notna(row['DOUBAN_VOTES']):
         genres = row['GENRES'].split('/')
         for genre in genres:
             if genre not in genre_ratings:
-                genre_ratings[genre] = []
-            genre_ratings[genre].append(row['DOUBAN_SCORE'])
+                genre_ratings[genre] = {
+                    'ratings': [],
+                    'votes': 0  # 累计评分数
+                }
+            genre_ratings[genre]['ratings'].append(row['DOUBAN_SCORE'])
+            genre_ratings[genre]['votes'] += int(row['DOUBAN_VOTES'])  # 累加评分数
 
+# 转换为DataFrame并排序
 genre_avg_ratings = {}
-for genre, ratings in genre_ratings.items():
+for genre, data in genre_ratings.items():
     genre_avg_ratings[genre] = {
-        'avg_rating': round(np.mean(ratings), 2),
-        'count': len(ratings)
+        'avg_rating': round(np.mean(data['ratings']), 2),
+        'votes': data['votes']  # 存储评分数而非作品数量
     }
 
 genre_rating_df = pd.DataFrame.from_dict(genre_avg_ratings, orient='index')
@@ -210,25 +215,29 @@ genre_rating_df = genre_rating_df.sort_values('avg_rating', ascending=False).hea
 visualization_data['genreRatingRelation'] = {
     'labels': genre_rating_df.index.tolist(),
     'data': genre_rating_df['avg_rating'].tolist(),
-    'counts': genre_rating_df['count'].tolist()
+    'votes': genre_rating_df['votes'].tolist()  # 替换counts为votes
 }
 
-# 导演与作品评分关系数据（前10个导演）
+# 导演相关数据处理（同样修改为DOUBAN_VOTES）
 director_ratings = {}
 for idx, row in movies_df.iterrows():
-    if pd.notna(row['DIRECTORS']) and pd.notna(row['DOUBAN_SCORE']):
+    if pd.notna(row['DIRECTORS']) and pd.notna(row['DOUBAN_SCORE']) and pd.notna(row['DOUBAN_VOTES']):
         directors = row['DIRECTORS'].split('/')
         for director in directors:
             if director not in director_ratings:
-                director_ratings[director] = []
-            director_ratings[director].append(row['DOUBAN_SCORE'])
+                director_ratings[director] = {
+                    'ratings': [],
+                    'votes': 0
+                }
+            director_ratings[director]['ratings'].append(row['DOUBAN_SCORE'])
+            director_ratings[director]['votes'] += int(row['DOUBAN_VOTES'])
 
 director_avg_ratings = {}
-for director, ratings in director_ratings.items():
-    if len(ratings) >= 3:
+for director, data in director_ratings.items():
+    if len(data['ratings']) >= 3:
         director_avg_ratings[director] = {
-            'avg_rating': round(np.mean(ratings), 2),
-            'count': len(ratings)
+            'avg_rating': round(np.mean(data['ratings']), 2),
+            'votes': data['votes']
         }
 
 director_rating_df = pd.DataFrame.from_dict(director_avg_ratings, orient='index')
@@ -236,25 +245,29 @@ director_rating_df = director_rating_df.sort_values('avg_rating', ascending=Fals
 visualization_data['directorRatingRelation'] = {
     'labels': director_rating_df.index.tolist(),
     'data': director_rating_df['avg_rating'].tolist(),
-    'counts': director_rating_df['count'].tolist()
+    'votes': director_rating_df['votes'].tolist()  # 替换counts为votes
 }
 
 # 演员与作品评分关系数据（前10个演员）
 actor_ratings = {}
 for idx, row in movies_df.iterrows():
-    if pd.notna(row['ACTORS']) and pd.notna(row['DOUBAN_SCORE']):
+    if pd.notna(row['ACTORS']) and pd.notna(row['DOUBAN_SCORE']) and pd.notna(row['DOUBAN_VOTES']):
         actors = row['ACTORS'].split('/')
         for actor in actors:
             if actor not in actor_ratings:
-                actor_ratings[actor] = []
-            actor_ratings[actor].append(row['DOUBAN_SCORE'])
+                actor_ratings[actor] = {
+                    'ratings': [],
+                    'votes': 0
+                }
+            actor_ratings[actor]['ratings'].append(row['DOUBAN_SCORE'])
+            actor_ratings[actor]['votes'] += int(row['DOUBAN_VOTES'])
 
 actor_avg_ratings = {}
-for actor, ratings in actor_ratings.items():
-    if len(ratings) >= 3:
+for actor, data in actor_ratings.items():
+    if len(data['ratings']) >= 3:
         actor_avg_ratings[actor] = {
-            'avg_rating': round(np.mean(ratings), 2),
-            'count': len(ratings)
+            'avg_rating': round(np.mean(data['ratings']), 2),
+            'votes': data['votes']
         }
 
 actor_rating_df = pd.DataFrame.from_dict(actor_avg_ratings, orient='index')
@@ -262,7 +275,7 @@ actor_rating_df = actor_rating_df.sort_values('avg_rating', ascending=False).hea
 visualization_data['actorRatingRelation'] = {
     'labels': actor_rating_df.index.tolist(),
     'data': actor_rating_df['avg_rating'].tolist(),
-    'counts': actor_rating_df['count'].tolist()
+    'votes': actor_rating_df['votes'].tolist()
 }
 
 # 7. 演员-导演合作网络数据
