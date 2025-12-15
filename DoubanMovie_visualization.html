@@ -4,41 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>电影数据可视化分析系统</title>
-    
+
     <!-- 静态资源引用 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-    
+
     <!-- 内联数据区 -->
     <script>
-        // 样例电影数据
+        // 扩展样例电影数据（包含封面和豆瓣链接）
         const sampleMovies = [
-            {"MOVIE_ID": 3249999, "NAME": "林肯公园：革命之路", "DIRECTORS": "", "ACTORS": "查斯特·班宁顿/罗伯·波顿/布莱德·德尔森/菲尼克斯·法雷尔/约瑟夫·韩/麦克·信田", "GENRES": "歌舞", "DOUBAN_SCORE": 9.4, "YEAR": 2008},
-            {"MOVIE_ID": 26667648, "NAME": "九纹龙史进之除恶史家庄", "DIRECTORS": "刘信义", "ACTORS": "朱晓辉/淳于珊珊/耿懿", "GENRES": "剧情/武侠", "DOUBAN_SCORE": 6.4, "YEAR": 2016},
-            {"MOVIE_ID": 1477536, "NAME": "婼玛的十七岁", "DIRECTORS": "章家瑞", "ACTORS": "李敏/杨志刚", "GENRES": "剧情", "DOUBAN_SCORE": 7.0, "YEAR": 2003},
-            {"MOVIE_ID": 7052774, "NAME": "2011全美音乐大奖", "DIRECTORS": "", "ACTORS": "", "GENRES": "音乐", "DOUBAN_SCORE": 6.8, "YEAR": 2011},
-            {"MOVIE_ID": 1299558, "NAME": "第三类外星人", "DIRECTORS": "", "ACTORS": "玛瑞·亚达波Maryam d'Abo", "GENRES": "科幻/恐怖", "DOUBAN_SCORE": 6.0, "YEAR": 1983},
-            {"MOVIE_ID": 1307325, "NAME": "午夜巴塞罗那", "DIRECTORS": "伍迪·艾伦", "ACTORS": "丽贝卡·豪尔/斯嘉丽·约翰逊/哈维尔·巴登/佩内洛普·克鲁兹/克里斯·梅西纳", "GENRES": "剧情/爱情", "DOUBAN_SCORE": 7.8, "YEAR": 2008},
-            {"MOVIE_ID": 1307326, "NAME": "雨人", "DIRECTORS": "巴瑞·莱文森", "ACTORS": "达斯汀·霍夫曼/汤姆·克鲁斯/瓦莱莉·高利诺/邦尼·亨特", "GENRES": "剧情", "DOUBAN_SCORE": 8.7, "YEAR": 1988},
-            {"MOVIE_ID": 1307327, "NAME": "教父", "DIRECTORS": "弗朗西斯·福特·科波拉", "ACTORS": "马龙·白兰度/阿尔·帕西诺/詹姆斯·卡恩/罗伯特·杜瓦尔/黛安·基顿", "GENRES": "剧情/犯罪", "DOUBAN_SCORE": 9.3, "YEAR": 1972},
-            {"MOVIE_ID": 1307328, "NAME": "肖申克的救赎", "DIRECTORS": "弗兰克·德拉邦特", "ACTORS": "蒂姆·罗宾斯/摩根·弗里曼/鲍勃·冈顿/威廉姆·赛德勒/克兰西·布朗", "GENRES": "剧情/犯罪", "DOUBAN_SCORE": 9.7, "YEAR": 1994},
-            {"MOVIE_ID": 1307329, "NAME": "控方证人", "DIRECTORS": "比利·怀尔德", "ACTORS": "泰隆·鲍华/玛琳·黛德丽/查尔斯·劳顿/爱尔莎·兰切斯特/约翰·威廉姆斯", "GENRES": "剧情/犯罪/悬疑", "DOUBAN_SCORE": 9.6, "YEAR": 1957}
-        ];
-
-        // 样例评分数据
-        const sampleRatings = [
-            {"RATING_ID": 1359352573, "USER_MD5": "0ab7e3efacd56983f16503572d2b9915", "MOVIE_ID": 5113101, "RATING": 2, "RATING_TIME": "2018-09-05 19:42:07"},
-            {"RATING_ID": 1598245094, "USER_MD5": "84dfd3f91dd85ea105bc74a4f0d7a067", "MOVIE_ID": 5113101, "RATING": 1, "RATING_TIME": "2019-07-09 14:52:07"},
-            {"RATING_ID": 311937819, "USER_MD5": "c9a47fd59b55967ceac07cac6d5f270c", "MOVIE_ID": 3718526, "RATING": 3, "RATING_TIME": "2010-11-05 22:15:44"},
-            {"RATING_ID": 457663846, "USER_MD5": "18cbf971bdf17336056674bb8fad7ea2", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2011-11-14 22:31:02"},
-            {"RATING_ID": 313277849, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
-            {"RATING_ID": 313277850, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
-            {"RATING_ID": 313277851, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
-            {"RATING_ID": 313277852, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
-            {"RATING_ID": 313277853, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"},
-            {"RATING_ID": 313277854, "USER_MD5": "47e69de0d68e6a4db159bc29301caece", "MOVIE_ID": 3718526, "RATING": 4, "RATING_TIME": "2010-11-09 12:41:11"}
+            { "MOVIE_ID": 3249999, "NAME": "林肯公园：革命之路", "DIRECTORS": "", "ACTORS": "查斯特·班宁顿/罗伯·波顿/布莱德·德尔森/菲尼克斯·法雷尔/约瑟夫·韩/麦克·信田", "GENRES": "歌舞", "DOUBAN_SCORE": 9.4, "YEAR": 2008, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2885132950.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/3249999/" },
+            { "MOVIE_ID": 26667648, "NAME": "九纹龙史进之除恶史家庄", "DIRECTORS": "刘信义", "ACTORS": "朱晓辉/淳于珊珊/耿懿", "GENRES": "剧情/武侠", "DOUBAN_SCORE": 6.4, "YEAR": 2016, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2374150732.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/26667648/" },
+            { "MOVIE_ID": 1477536, "NAME": "婼玛的十七岁", "DIRECTORS": "章家瑞", "ACTORS": "李敏/杨志刚", "GENRES": "剧情", "DOUBAN_SCORE": 7.0, "YEAR": 2003, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2519224639.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1477536/" },
+            { "MOVIE_ID": 7052774, "NAME": "2011全美音乐大奖", "DIRECTORS": "", "ACTORS": "", "GENRES": "音乐", "DOUBAN_SCORE": 6.8, "YEAR": 2011, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2603403135.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/7052774/" },
+            { "MOVIE_ID": 1299558, "NAME": "第三类外星人", "DIRECTORS": "", "ACTORS": "玛瑞·亚达波Maryam d'Abo", "GENRES": "科幻/恐怖", "DOUBAN_SCORE": 6.0, "YEAR": 1983, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2557537172.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1299558/" },
+            { "MOVIE_ID": 1307325, "NAME": "午夜巴塞罗那", "DIRECTORS": "伍迪·艾伦", "ACTORS": "丽贝卡·豪尔/斯嘉丽·约翰逊/哈维尔·巴登/佩内洛普·克鲁兹/克里斯·梅西纳", "GENRES": "剧情/爱情", "DOUBAN_SCORE": 7.8, "YEAR": 2008, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2362007757.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1307325/" },
+            { "MOVIE_ID": 1307326, "NAME": "雨人", "DIRECTORS": "巴瑞·莱文森", "ACTORS": "达斯汀·霍夫曼/汤姆·克鲁斯/瓦莱莉·高利诺/邦尼·亨特", "GENRES": "剧情", "DOUBAN_SCORE": 8.7, "YEAR": 1988, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2353324612.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1307326/" },
+            { "MOVIE_ID": 1307327, "NAME": "教父", "DIRECTORS": "弗朗西斯·福特·科波拉", "ACTORS": "马龙·白兰度/阿尔·帕西诺/詹姆斯·卡恩/罗伯特·杜瓦尔/黛安·基顿", "GENRES": "剧情/犯罪", "DOUBAN_SCORE": 9.3, "YEAR": 1972, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p616779645.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1307327/" },
+            { "MOVIE_ID": 1307328, "NAME": "肖申克的救赎", "DIRECTORS": "弗兰克·德拉邦特", "ACTORS": "蒂姆·罗宾斯/摩根·弗里曼/鲍勃·冈顿/威廉姆·赛德勒/克兰西·布朗", "GENRES": "剧情/犯罪", "DOUBAN_SCORE": 9.7, "YEAR": 1994, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p480747492.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1307328/" },
+            { "MOVIE_ID": 1307329, "NAME": "控方证人", "DIRECTORS": "比利·怀尔德", "ACTORS": "泰隆·鲍华/玛琳·黛德丽/查尔斯·劳顿/爱尔莎·兰切斯特/约翰·威廉姆斯", "GENRES": "剧情/犯罪/悬疑", "DOUBAN_SCORE": 9.6, "YEAR": 1957, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p1505392928.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1307329/" },
+            { "MOVIE_ID": 1291546, "NAME": "霸王别姬", "DIRECTORS": "陈凯歌", "ACTORS": "张国荣/张丰毅/巩俐/葛优/英达/蒋雯丽", "GENRES": "剧情/爱情/同性", "DOUBAN_SCORE": 9.6, "YEAR": 1993, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2561716440.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1291546/" },
+            { "MOVIE_ID": 1292720, "NAME": "阿甘正传", "DIRECTORS": "罗伯特·泽米吉斯", "ACTORS": "汤姆·汉克斯/罗宾·怀特/加里·西尼斯/麦凯尔泰·威廉逊/莎莉·菲尔德", "GENRES": "剧情/爱情", "DOUBAN_SCORE": 9.5, "YEAR": 1994, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2372307693.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1292720/" },
+            { "MOVIE_ID": 1292722, "NAME": "泰坦尼克号", "DIRECTORS": "詹姆斯·卡梅隆", "ACTORS": "莱昂纳多·迪卡普里奥/凯特·温丝莱特/比利·赞恩/凯西·贝茨/弗兰西丝·费舍", "GENRES": "剧情/爱情/灾难", "DOUBAN_SCORE": 9.4, "YEAR": 1997, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p457760035.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1292722/" },
+            { "MOVIE_ID": 1295644, "NAME": "这个杀手不太冷", "DIRECTORS": "吕克·贝松", "ACTORS": "让·雷诺/娜塔莉·波特曼/加里·奥德曼/丹尼·爱罗/彼得·阿佩尔", "GENRES": "剧情/动作/犯罪", "DOUBAN_SCORE": 9.4, "YEAR": 1994, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p511118051.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1295644/" },
+            { "MOVIE_ID": 1291561, "NAME": "千与千寻", "DIRECTORS": "宫崎骏", "ACTORS": "柊瑠美/入野自由/夏木真理/菅原文太/中村彰男", "GENRES": "剧情/动画/奇幻", "DOUBAN_SCORE": 9.4, "YEAR": 2001, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2557573348.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1291561/" },
+            { "MOVIE_ID": 3541415, "NAME": "盗梦空间", "DIRECTORS": "克里斯托弗·诺兰", "ACTORS": "莱昂纳多·迪卡普里奥/约瑟夫·高登-莱维特/艾伦·佩吉/汤姆·哈迪/渡边谦", "GENRES": "剧情/科幻/悬疑/冒险", "DOUBAN_SCORE": 9.3, "YEAR": 2010, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2616355133.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/3541415/" },
+            { "MOVIE_ID": 3793023, "NAME": "三傻大闹宝莱坞", "DIRECTORS": "拉吉库马尔·希拉尼", "ACTORS": "阿米尔·汗/卡琳娜·卡普尔/马达范/沙尔曼·乔希/奥米·瓦依达", "GENRES": "剧情/喜剧/爱情/歌舞", "DOUBAN_SCORE": 9.2, "YEAR": 2009, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p579729551.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/3793023/" },
+            { "MOVIE_ID": 25662329, "NAME": "疯狂动物城", "DIRECTORS": "拜伦·霍华德/瑞奇·摩尔/杰拉德·布什", "ACTORS": "金妮弗·古德温/杰森·贝特曼/伊德里斯·艾尔巴/珍妮·斯蕾特/内特·托伦斯", "GENRES": "喜剧/动画/冒险", "DOUBAN_SCORE": 9.2, "YEAR": 2016, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2614500649.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/25662329/" },
+            { "MOVIE_ID": 1292001, "NAME": "海上钢琴师", "DIRECTORS": "朱塞佩·托纳多雷", "ACTORS": "蒂姆·罗斯/普路特·泰勒·文斯/比尔·努恩/克兰伦斯·威廉姆斯三世/梅兰尼·蒂埃里", "GENRES": "剧情/音乐", "DOUBAN_SCORE": 9.3, "YEAR": 1998, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2574551676.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1292001/" },
+            { "MOVIE_ID": 1291549, "NAME": "放牛班的春天", "DIRECTORS": "克里斯托夫·巴拉蒂", "ACTORS": "热拉尔·朱尼奥/弗朗索瓦·贝莱昂/凯德·麦拉德/让-保罗·博奈雷/玛丽·布奈尔", "GENRES": "剧情/音乐", "DOUBAN_SCORE": 9.3, "YEAR": 2004, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p1910824951.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1291549/" },
+            { "MOVIE_ID": 1291841, "NAME": "教父2", "DIRECTORS": "弗朗西斯·福特·科波拉", "ACTORS": "阿尔·帕西诺/罗伯特·杜瓦尔/黛安·基顿/罗伯特·德尼罗/约翰·凯泽尔", "GENRES": "剧情/犯罪", "DOUBAN_SCORE": 9.2, "YEAR": 1974, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2194138787.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1291841/" },
+            { "MOVIE_ID": 1292365, "NAME": "活着", "DIRECTORS": "张艺谋", "ACTORS": "葛优/巩俐/姜武/牛犇/郭涛", "GENRES": "剧情/家庭/历史", "DOUBAN_SCORE": 9.3, "YEAR": 1994, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2513253791.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1292365/" },
+            { "MOVIE_ID": 1292220, "NAME": "情书", "DIRECTORS": "岩井俊二", "ACTORS": "中山美穗/丰川悦司/酒井美纪/柏原崇/范文雀", "GENRES": "剧情/爱情", "DOUBAN_SCORE": 8.9, "YEAR": 1995, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p449897379.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1292220/" },
+            { "MOVIE_ID": 1291560, "NAME": "龙猫", "DIRECTORS": "宫崎骏", "ACTORS": "日高法子/坂本千夏/岛本须美/北林谷荣/高木均", "GENRES": "动画/奇幻/冒险", "DOUBAN_SCORE": 9.2, "YEAR": 1988, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2540924496.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1291560/" },
+            { "MOVIE_ID": 1291583, "NAME": "天空之城", "DIRECTORS": "宫崎骏", "ACTORS": "田中真弓/横泽启子/初井言荣/寺田农/常田富士男", "GENRES": "动画/奇幻/冒险", "DOUBAN_SCORE": 9.1, "YEAR": 1986, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p1446261379.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1291583/" },
+            { "MOVIE_ID": 1291843, "NAME": "黑客帝国", "DIRECTORS": "莉莉·沃卓斯基/拉娜·沃卓斯基", "ACTORS": "基努·里维斯/劳伦斯·菲什伯恩/凯瑞-安·莫斯/雨果·维文/格洛丽亚·福斯特", "GENRES": "动作/科幻", "DOUBAN_SCORE": 9.1, "YEAR": 1999, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p451926968.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1291843/" },
+            { "MOVIE_ID": 1293350, "NAME": "菊次郎的夏天", "DIRECTORS": "北野武", "ACTORS": "北野武/关口雄介/岸本加世子/吉行和子/细川典江", "GENRES": "剧情/喜剧", "DOUBAN_SCORE": 8.9, "YEAR": 1999, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2624901896.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1293350/" },
+            { "MOVIE_ID": 1293359, "NAME": "两杆大烟枪", "DIRECTORS": "盖·里奇", "ACTORS": "杰森·弗莱明/德克斯特·弗莱彻/尼克·莫兰/杰森·斯坦森/斯蒂文·麦金托什", "GENRES": "剧情/喜剧/犯罪", "DOUBAN_SCORE": 9.1, "YEAR": 1998, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p792443418.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1293359/" },
+            { "MOVIE_ID": 1293460, "NAME": "雨中曲", "DIRECTORS": "斯坦利·多南/吉恩·凯利", "ACTORS": "吉恩·凯利/唐纳德·奥康纳/黛比·雷诺斯/简·哈根/米勒德·米切尔", "GENRES": "喜剧/爱情/歌舞", "DOUBAN_SCORE": 9.1, "YEAR": 1952, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p1612355875.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1293460/" },
+            { "MOVIE_ID": 1293764, "NAME": "与狼共舞", "DIRECTORS": "凯文·科斯特纳", "ACTORS": "凯文·科斯特纳/玛丽·麦克唐纳/格雷厄姆·格林/罗德尼·格兰特/弗洛伊德·怀斯特曼", "GENRES": "剧情/西部/冒险", "DOUBAN_SCORE": 8.9, "YEAR": 1990, "COVER": "https://img9.doubanio.com/view/photo/s_ratio_poster/public/p499158228.jpg", "DOUBAN_LINK": "https://movie.douban.com/subject/1293764/" }
         ];
 
         // 可视化数据
@@ -57,48 +63,48 @@
             },
             genreRatingRelation: {
                 labels: ['舞台艺术', '短片', '歌舞', '音乐', '戏曲', '传记', '历史', '动画', '西部', '运动', '家庭', '儿童', '战争', '剧情', '喜剧'],
-                data: [8.6, 8.2, 7.56, 7.48, 7.45, 7.44, 7.27, 7.26, 7.08, 7.01, 7.01, 7.0, 6.94, 6.92, 6.83],
-                counts: [2, 1, 22, 35, 2, 31, 26, 67, 8, 14, 43, 10, 43, 569, 230]
+                data: [8.6, 8.2, 7.56, 7.48, 7.45, 7.44, 7.27, 7.26, 7.07, 7.01, 7.01, 7.0, 6.94, 6.92, 6.83],
+                votes: [477, 542, 37122, 84173, 561, 284885, 227960, 1450960, 63538, 131626, 490301, 102991, 343327, 4206125, 2781506]
             },
             directorRatingRelation: {
-                labels: ['黑泽明', '是枝裕和', '张彻', '徐克', '查尔斯·维多', '楚原', '王晶', '朱延平', '罗维'],
+                labels: ['黑泽明', '是枝裕和', '张彻', '查尔斯·维多', '徐克', '楚原', '王晶', '朱延平', '罗维'],
                 data: [8.63, 7.47, 6.95, 6.87, 6.87, 6.75, 6.23, 6.15, 5.83],
-                counts: [3, 3, 6, 3, 3, 4, 3, 4, 3]
+                votes: [44162, 58328, 5218, 946, 52043, 4806, 66528, 114823, 241]
             },
             actorRatingRelation: {
-                labels: ['笠智众', '山崎努', '让娜·莫罗', '杰弗里·拉什', '安东尼·霍普金斯', '木村多江', '吉姆·卡维泽', '三船敏郎', '弗雷德里克·马奇', '米歇尔·西蒙'],
+                labels: ['笠智众', '山崎努', '让娜·莫罗', '杰弗里·拉什', '安东尼·霍普金斯', '木村多江', '吉姆·卡维泽', '三船敏郎', '米歇尔·西蒙', '弗雷德里克·马奇'],
                 data: [8.37, 8.27, 8.15, 8.1, 8.03, 8.0, 7.93, 7.85, 7.8, 7.8],
-                counts: [3, 3, 4, 3, 3, 3, 3, 4, 3, 4]
+                votes: [6028, 39175, 143104, 368258, 8812, 38953, 77696, 12693, 4741, 1943]
             },
             cooperationNetwork: {
                 nodes: [
-                    {"id": "王钟", "group": 1}, {"id": "张彻", "group": 2}, {"id": "姜大卫", "group": 1},
-                    {"id": "曾志伟", "group": 1}, {"id": "朱延平", "group": 2}, {"id": "黄秋生", "group": 1},
-                    {"id": "王晶", "group": 2}, {"id": "时任步", "group": 1}, {"id": "川野浩司", "group": 2},
-                    {"id": "井淼", "group": 1}, {"id": "伍迪·艾伦", "group": 1}, {"id": "伍迪·艾伦", "group": 2},
-                    {"id": "三船敏郎", "group": 1}, {"id": "黑泽明", "group": 2}, {"id": "山崎努", "group": 1},
-                    {"id": "伯特·兰卡斯特", "group": 1}, {"id": "约翰·弗兰克海默", "group": 2}, {"id": "达斯汀·霍夫曼", "group": 1},
-                    {"id": "巴瑞·莱文森", "group": 2}, {"id": "阿尔·帕西诺", "group": 1}, {"id": "弗朗西斯·福特·科波拉", "group": 2},
-                    {"id": "蒂姆·罗宾斯", "group": 1}, {"id": "弗兰克·德拉邦特", "group": 2}, {"id": "泰隆·鲍华", "group": 1},
-                    {"id": "比利·怀尔德", "group": 2}, {"id": "克里斯托弗·诺兰", "group": 2}, {"id": "莱昂纳多·迪卡普里奥", "group": 1},
-                    {"id": "马丁·斯科塞斯", "group": 2}, {"id": "罗伯特·德尼罗", "group": 1}, {"id": "宫崎骏", "group": 2},
-                    {"id": "汤姆·汉克斯", "group": 1}, {"id": "史蒂文·斯皮尔伯格", "group": 2}, {"id": "布拉德·皮特", "group": 1},
-                    {"id": "昆汀·塔伦蒂诺", "group": 2}, {"id": "安吉丽娜·朱莉", "group": 1}, {"id": "克林特·伊斯特伍德", "group": 2},
-                    {"id": "约翰尼·德普", "group": 1}, {"id": "蒂姆·伯顿", "group": 2}, {"id": "梅丽尔·斯特里普", "group": 1},
-                    {"id": "罗伯特·泽米吉斯", "group": 2}
+                    { "id": "王钟", "group": 1 }, { "id": "张彻", "group": 2 }, { "id": "姜大卫", "group": 1 },
+                    { "id": "曾志伟", "group": 1 }, { "id": "朱延平", "group": 2 }, { "id": "黄秋生", "group": 1 },
+                    { "id": "王晶", "group": 2 }, { "id": "时任步", "group": 1 }, { "id": "川野浩司", "group": 2 },
+                    { "id": "井淼", "group": 1 }, { "id": "伍迪·艾伦", "group": 1 }, { "id": "伍迪·艾伦", "group": 2 },
+                    { "id": "三船敏郎", "group": 1 }, { "id": "黑泽明", "group": 2 }, { "id": "山崎努", "group": 1 },
+                    { "id": "伯特·兰卡斯特", "group": 1 }, { "id": "约翰·弗兰克海默", "group": 2 }, { "id": "达斯汀·霍夫曼", "group": 1 },
+                    { "id": "巴瑞·莱文森", "group": 2 }, { "id": "阿尔·帕西诺", "group": 1 }, { "id": "弗朗西斯·福特·科波拉", "group": 2 },
+                    { "id": "蒂姆·罗宾斯", "group": 1 }, { "id": "弗兰克·德拉邦特", "group": 2 }, { "id": "泰隆·鲍华", "group": 1 },
+                    { "id": "比利·怀尔德", "group": 2 }, { "id": "克里斯托弗·诺兰", "group": 2 }, { "id": "莱昂纳多·迪卡普里奥", "group": 1 },
+                    { "id": "马丁·斯科塞斯", "group": 2 }, { "id": "罗伯特·德尼罗", "group": 1 }, { "id": "宫崎骏", "group": 2 },
+                    { "id": "汤姆·汉克斯", "group": 1 }, { "id": "史蒂文·斯皮尔伯格", "group": 2 }, { "id": "布拉德·皮特", "group": 1 },
+                    { "id": "昆汀·塔伦蒂诺", "group": 2 }, { "id": "安吉丽娜·朱莉", "group": 1 }, { "id": "克林特·伊斯特伍德", "group": 2 },
+                    { "id": "约翰尼·德普", "group": 1 }, { "id": "蒂姆·伯顿", "group": 2 }, { "id": "梅丽尔·斯特里普", "group": 1 },
+                    { "id": "罗伯特·泽米吉斯", "group": 2 }
                 ],
                 links: [
-                    {"source": "王钟", "target": "张彻", "value": 3}, {"source": "姜大卫", "target": "张彻", "value": 3},
-                    {"source": "曾志伟", "target": "朱延平", "value": 2}, {"source": "黄秋生", "target": "王晶", "value": 2},
-                    {"source": "时任步", "target": "川野浩司", "value": 2}, {"source": "井淼", "target": "张彻", "value": 2},
-                    {"source": "伍迪·艾伦", "target": "伍迪·艾伦", "value": 2}, {"source": "三船敏郎", "target": "黑泽明", "value": 2},
-                    {"source": "山崎努", "target": "黑泽明", "value": 2}, {"source": "伯特·兰卡斯特", "target": "约翰·弗兰克海默", "value": 2},
-                    {"source": "达斯汀·霍夫曼", "target": "巴瑞·莱文森", "value": 2}, {"source": "阿尔·帕西诺", "target": "弗朗西斯·福特·科波拉", "value": 2},
-                    {"source": "蒂姆·罗宾斯", "target": "弗兰克·德拉邦特", "value": 2}, {"source": "泰隆·鲍华", "target": "比利·怀尔德", "value": 2},
-                    {"source": "莱昂纳多·迪卡普里奥", "target": "克里斯托弗·诺兰", "value": 2}, {"source": "莱昂纳多·迪卡普里奥", "target": "马丁·斯科塞斯", "value": 2},
-                    {"source": "罗伯特·德尼罗", "target": "马丁·斯科塞斯", "value": 2}, {"source": "汤姆·汉克斯", "target": "史蒂文·斯皮尔伯格", "value": 2},
-                    {"source": "布拉德·皮特", "target": "昆汀·塔伦蒂诺", "value": 2}, {"source": "安吉丽娜·朱莉", "target": "克林特·伊斯特伍德", "value": 2},
-                    {"source": "约翰尼·德普", "target": "蒂姆·伯顿", "value": 2}, {"source": "梅丽尔·斯特里普", "target": "罗伯特·泽米吉斯", "value": 2}
+                    { "source": "王钟", "target": "张彻", "value": 3 }, { "source": "姜大卫", "target": "张彻", "value": 3 },
+                    { "source": "曾志伟", "target": "朱延平", "value": 2 }, { "source": "黄秋生", "target": "王晶", "value": 2 },
+                    { "source": "时任步", "target": "川野浩司", "value": 2 }, { "source": "井淼", "target": "张彻", "value": 2 },
+                    { "source": "伍迪·艾伦", "target": "伍迪·艾伦", "value": 2 }, { "source": "三船敏郎", "target": "黑泽明", "value": 2 },
+                    { "source": "山崎努", "target": "黑泽明", "value": 2 }, { "source": "伯特·兰卡斯特", "target": "约翰·弗兰克海默", "value": 2 },
+                    { "source": "达斯汀·霍夫曼", "target": "巴瑞·莱文森", "value": 2 }, { "source": "阿尔·帕西诺", "target": "弗朗西斯·福特·科波拉", "value": 2 },
+                    { "source": "蒂姆·罗宾斯", "target": "弗兰克·德拉邦特", "value": 2 }, { "source": "泰隆·鲍华", "target": "比利·怀尔德", "value": 2 },
+                    { "source": "莱昂纳多·迪卡普里奥", "target": "克里斯托弗·诺兰", "value": 2 }, { "source": "莱昂纳多·迪卡普里奥", "target": "马丁·斯科塞斯", "value": 2 },
+                    { "source": "罗伯特·德尼罗", "target": "马丁·斯科塞斯", "value": 2 }, { "source": "汤姆·汉克斯", "target": "史蒂文·斯皮尔伯格", "value": 2 },
+                    { "source": "布拉德·皮特", "target": "昆汀·塔伦蒂诺", "value": 2 }, { "source": "安吉丽娜·朱莉", "target": "克林特·伊斯特伍德", "value": 2 },
+                    { "source": "约翰尼·德普", "target": "蒂姆·伯顿", "value": 2 }, { "source": "梅丽尔·斯特里普", "target": "罗伯特·泽米吉斯", "value": 2 }
                 ]
             }
         };
@@ -172,47 +178,60 @@
             </div>
         </div>
 
-        <!-- 样例数据展示 -->
+        <!-- 改进后的电影展示面板 -->
         <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
             <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-table text-blue-600 mr-2"></i>
-                样例数据展示
+                <i class="fas fa-film text-blue-600 mr-2"></i>
+                电影展示面板
             </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- 电影样例数据 -->
+
+            <!-- 类型筛选和排序控制 -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">电影数据（前5条）</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm text-left text-gray-500">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-2 py-2">电影名称</th>
-                                    <th class="px-2 py-2">类型</th>
-                                    <th class="px-2 py-2">评分</th>
-                                    <th class="px-2 py-2">年份</th>
-                                </tr>
-                            </thead>
-                            <tbody id="movieTable">
-                            </tbody>
-                        </table>
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">按类型筛选：</h3>
+                    <div class="flex flex-wrap gap-2" id="genreFilters">
+                        <!-- 类型按钮将由JavaScript动态生成 -->
                     </div>
                 </div>
-                <!-- 评分样例数据 -->
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">用户评分数据（前5条）</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm text-left text-gray-500">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-2 py-2">电影ID</th>
-                                    <th class="px-2 py-2">评分</th>
-                                    <th class="px-2 py-2">评分时间</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ratingTable">
-                            </tbody>
-                        </table>
+
+                <div class="flex items-center space-x-4">
+                    <div>
+                        <label for="sortSelect" class="text-sm font-medium text-gray-700 mr-2">排序方式：</label>
+                        <select id="sortSelect" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="default">默认顺序</option>
+                            <option value="rating_desc">评分从高到低</option>
+                            <option value="rating_asc">评分从低到高</option>
+                            <option value="year_desc">年份从新到旧</option>
+                            <option value="year_asc">年份从旧到新</option>
+                        </select>
                     </div>
+
+                    <div class="text-sm text-gray-500">
+                        显示: <span id="currentRange">1-15</span> / <span id="totalMovies">0</span> 部电影
+                    </div>
+                </div>
+            </div>
+
+            <!-- 电影展示区域 -->
+            <div id="moviesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                <!-- 电影卡片将由JavaScript动态生成 -->
+            </div>
+
+            <!-- 分页控件 -->
+            <div class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-gray-200">
+                <div class="text-sm text-gray-500 mb-4 sm:mb-0">
+                    第 <span id="currentPage">1</span> 页，共 <span id="totalPages">0</span> 页
+                </div>
+                <div class="flex space-x-2">
+                    <button id="prevPage" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-chevron-left mr-1"></i> 上一页
+                    </button>
+                    <div class="flex space-x-1" id="pageNumbers">
+                        <!-- 页码按钮将由JavaScript动态生成 -->
+                    </div>
+                    <button id="nextPage" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        下一页 <i class="fas fa-chevron-right ml-1"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -252,7 +271,7 @@
                 </div>
             </div>
 
-            <!-- 电影类型与评分关系 -->
+            <!-- 电影类型与评分关系区域（含新增评分数量图表） -->
             <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                     <i class="fas fa-chart-line text-orange-600 mr-2"></i>
@@ -261,12 +280,18 @@
                 <div class="relative h-80">
                     <canvas id="genreRatingChart"></canvas>
                 </div>
-            </div>
-        </div>
 
-        <!-- 导演和演员分析 -->
-        <div class="grid grid-cols-1 gap-8 mb-8">
-            <!-- 导演评分关系 -->
+                <!-- 新增：电影类型评分数量柱状图 -->
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 mt-8 flex items-center">
+                    <i class="fas fa-chart-bar text-orange-600 mr-2"></i>
+                    电影类型评分数量
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="genreVotesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 导演评分关系区域（含新增评分数量图表） -->
             <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                     <i class="fas fa-user-tie text-red-600 mr-2"></i>
@@ -275,9 +300,18 @@
                 <div class="relative h-80">
                     <canvas id="directorRatingChart"></canvas>
                 </div>
+
+                <!-- 新增：导演评分数量柱状图 -->
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 mt-8 flex items-center">
+                    <i class="fas fa-chart-bar text-red-600 mr-2"></i>
+                    导演作品总评分数量
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="directorVotesChart"></canvas>
+                </div>
             </div>
 
-            <!-- 演员评分关系 -->
+            <!-- 演员评分关系区域（含新增评分数量图表） -->
             <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                     <i class="fas fa-user-friends text-indigo-600 mr-2"></i>
@@ -286,61 +320,342 @@
                 <div class="relative h-80">
                     <canvas id="actorRatingChart"></canvas>
                 </div>
-            </div>
-        </div>
 
-        <!-- 演员-导演合作网络 -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-project-diagram text-teal-600 mr-2"></i>
-                演员-导演合作网络（合作≥2次）
-            </h3>
-            <div class="relative h-160">
-                <div id="networkChart" class="w-full h-full"></div>
-                <div class="absolute bottom-4 left-4 text-sm text-gray-500">
-                    <span class="inline-block w-3 h-3 bg-blue-500 rounded-full mr-1"></span> 演员
-                    <span class="inline-block w-3 h-3 bg-green-500 rounded-full ml-4 mr-1"></span> 导演
+                <!-- 新增：演员评分数量柱状图 -->
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 mt-8 flex items-center">
+                    <i class="fas fa-chart-bar text-indigo-600 mr-2"></i>
+                    演员作品总评分数量
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="actorVotesChart"></canvas>
                 </div>
             </div>
+
+            <!-- 演员-导演合作网络 -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-project-diagram text-teal-600 mr-2"></i>
+                    演员-导演合作网络（合作≥2次）
+                </h3>
+                <div class="relative h-160">
+                    <div id="networkChart" class="w-full h-full"></div>
+                    <div class="absolute bottom-4 left-4 text-sm text-gray-500">
+                        <span class="inline-block w-3 h-3 bg-blue-500 rounded-full mr-1"></span> 演员
+                        <span class="inline-block w-3 h-3 bg-green-500 rounded-full ml-4 mr-1"></span> 导演
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     <script>
-        // 填充样例数据表格
-        function populateTables() {
-            // 电影表格
-            const movieTableBody = document.getElementById('movieTable');
-            sampleMovies.slice(0, 5).forEach(movie => {
-                const row = movieTableBody.insertRow();
-                row.innerHTML = `
-                    <td class="px-2 py-2 font-medium text-gray-900">${movie.NAME}</td>
-                    <td class="px-2 py-2">${movie.GENRES}</td>
-                    <td class="px-2 py-2">
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            ${movie.DOUBAN_SCORE}
-                        </span>
-                    </td>
-                    <td class="px-2 py-2">${movie.YEAR}</td>
-                `;
-            });
+        // 电影展示系统
+        class MovieDisplaySystem {
+            constructor() {
+                this.movies = sampleMovies;
+                this.currentPage = 1;
+                this.itemsPerPage = 15;
+                this.selectedGenre = '全部';
+                this.sortOrder = 'default';
+                this.allGenres = this.extractAllGenres();
+                this.filteredMovies = [...this.movies];
+                this.init();
+            }
 
-            // 评分表格
-            const ratingTableBody = document.getElementById('ratingTable');
-            sampleRatings.slice(0, 5).forEach(rating => {
-                const row = ratingTableBody.insertRow();
-                row.innerHTML = `
-                    <td class="px-2 py-2 font-medium text-gray-900">${rating.MOVIE_ID}</td>
-                    <td class="px-2 py-2">
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            rating.RATING >= 4 ? 'bg-green-100 text-green-800' : 
-                            rating.RATING >= 3 ? 'bg-yellow-100 text-yellow-800' : 
-                            'bg-red-100 text-red-800'
+            // 从电影数据中提取所有类型
+            extractAllGenres() {
+                const genres = new Set(['全部']);
+                this.movies.forEach(movie => {
+                    if (movie.GENRES) {
+                        movie.GENRES.split('/').forEach(genre => {
+                            genres.add(genre.trim());
+                        });
+                    }
+                });
+                return Array.from(genres).sort();
+            }
+
+            // 初始化
+            init() {
+                this.renderGenreFilters();
+                this.renderMovies();
+                this.renderPagination();
+                this.setupEventListeners();
+            }
+
+            // 渲染类型筛选按钮
+            renderGenreFilters() {
+                const container = document.getElementById('genreFilters');
+                container.innerHTML = '';
+
+                this.allGenres.forEach(genre => {
+                    const button = document.createElement('button');
+                    button.className = `px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${this.selectedGenre === genre
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`;
+                    button.textContent = genre;
+                    button.dataset.genre = genre;
+                    button.addEventListener('click', () => this.filterByGenre(genre));
+                    container.appendChild(button);
+                });
+            }
+
+            // 按类型筛选电影
+            filterByGenre(genre) {
+                this.selectedGenre = genre;
+                this.currentPage = 1;
+
+                if (genre === '全部') {
+                    this.filteredMovies = [...this.movies];
+                } else {
+                    this.filteredMovies = this.movies.filter(movie =>
+                        movie.GENRES && movie.GENRES.includes(genre)
+                    );
+                }
+
+                this.applySorting();
+                this.renderGenreFilters();
+                this.renderMovies();
+                this.renderPagination();
+                this.updateDisplayInfo();
+            }
+
+            // 应用排序
+            applySorting() {
+                switch (this.sortOrder) {
+                    case 'rating_desc':
+                        this.filteredMovies.sort((a, b) => b.DOUBAN_SCORE - a.DOUBAN_SCORE);
+                        break;
+                    case 'rating_asc':
+                        this.filteredMovies.sort((a, b) => a.DOUBAN_SCORE - b.DOUBAN_SCORE);
+                        break;
+                    case 'year_desc':
+                        this.filteredMovies.sort((a, b) => b.YEAR - a.YEAR);
+                        break;
+                    case 'year_asc':
+                        this.filteredMovies.sort((a, b) => a.YEAR - b.YEAR);
+                        break;
+                    default:
+                        // 保持原始顺序
+                        break;
+                }
+            }
+
+            // 获取当前页的电影
+            getCurrentPageMovies() {
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                const endIndex = startIndex + this.itemsPerPage;
+                return this.filteredMovies.slice(startIndex, endIndex);
+            }
+
+            // 渲染电影卡片
+            renderMovies() {
+                const container = document.getElementById('moviesContainer');
+                container.innerHTML = '';
+
+                const currentMovies = this.getCurrentPageMovies();
+
+                if (currentMovies.length === 0) {
+                    container.innerHTML = `
+                            <div class="col-span-full text-center py-12">
+                                <i class="fas fa-film text-4xl text-gray-300 mb-4"></i>
+                                <p class="text-gray-500">没有找到符合条件的电影</p>
+                            </div>
+                        `;
+                    return;
+                }
+
+                currentMovies.forEach(movie => {
+                    const movieCard = this.createMovieCard(movie);
+                    container.appendChild(movieCard);
+                });
+            }
+
+            // 创建电影卡片
+            createMovieCard(movie) {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300';
+
+                // 评分星星
+                const stars = this.generateStarRating(movie.DOUBAN_SCORE);
+
+                // 类型标签
+                const genres = movie.GENRES ? movie.GENRES.split('/').slice(0, 2) : [];
+                const genreTags = genres.map(genre =>
+                    `<span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">${genre.trim()}</span>`
+                ).join('');
+
+                card.innerHTML = `
+                        <a href="${movie.DOUBAN_LINK}" target="_blank" class="block">
+                            <div class="relative">
+                                <img src="${movie.COVER}" alt="${movie.NAME}" class="w-full h-48 object-cover">
+                                <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                    ${movie.DOUBAN_SCORE.toFixed(1)}
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h3 class="font-semibold text-gray-900 text-sm mb-1 line-clamp-1">${movie.NAME}</h3>
+                                <p class="text-xs text-gray-500 mb-2">${movie.YEAR} · ${movie.DIRECTORS || '导演不详'}</p>
+                                <div class="flex items-center mb-2">
+                                    ${stars}
+                                </div>
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    ${genreTags}
+                                </div>
+                                <div class="text-xs text-gray-400 mt-2 flex justify-between">
+                                    <span>查看详情</span>
+                                    <i class="fas fa-external-link-alt"></i>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+
+                return card;
+            }
+
+            // 生成评分星星
+            generateStarRating(score) {
+                const fullStars = Math.floor(score / 2);
+                const halfStar = score % 2 >= 1;
+                const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+                let starsHtml = '';
+
+                for (let i = 0; i < fullStars; i++) {
+                    starsHtml += '<i class="fas fa-star text-yellow-400 text-xs"></i>';
+                }
+
+                if (halfStar) {
+                    starsHtml += '<i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>';
+                }
+
+                for (let i = 0; i < emptyStars; i++) {
+                    starsHtml += '<i class="far fa-star text-gray-300 text-xs"></i>';
+                }
+
+                return starsHtml;
+            }
+
+            // 渲染分页控件
+            renderPagination() {
+                const totalPages = Math.ceil(this.filteredMovies.length / this.itemsPerPage);
+
+                // 更新总页数
+                document.getElementById('totalPages').textContent = totalPages;
+                document.getElementById('currentPage').textContent = this.currentPage;
+
+                // 更新按钮状态
+                document.getElementById('prevPage').disabled = this.currentPage === 1;
+                document.getElementById('nextPage').disabled = this.currentPage === totalPages || totalPages === 0;
+
+                // 渲染页码按钮
+                const pageNumbersContainer = document.getElementById('pageNumbers');
+                pageNumbersContainer.innerHTML = '';
+
+                // 显示最多5个页码按钮
+                let startPage = Math.max(1, this.currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+
+                // 调整起始页码
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.className = `w-8 h-8 text-sm font-medium rounded-lg ${i === this.currentPage
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        }`;
+                    pageButton.textContent = i;
+                    pageButton.addEventListener('click', () => this.goToPage(i));
+                    pageNumbersContainer.appendChild(pageButton);
+                }
+
+                // 更新显示范围
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
+                const endIndex = Math.min(this.currentPage * this.itemsPerPage, this.filteredMovies.length);
+                document.getElementById('currentRange').textContent = `${startIndex}-${endIndex}`;
+                document.getElementById('totalMovies').textContent = this.filteredMovies.length;
+            }
+
+            // 跳转到指定页面
+            goToPage(page) {
+                this.currentPage = page;
+                this.renderMovies();
+                this.renderPagination();
+                window.scrollTo({ top: document.querySelector('#moviesContainer').offsetTop - 100, behavior: 'smooth' });
+            }
+
+            // 更新显示信息
+            updateDisplayInfo() {
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
+                const endIndex = Math.min(this.currentPage * this.itemsPerPage, this.filteredMovies.length);
+                document.getElementById('currentRange').textContent = `${startIndex}-${endIndex}`;
+                document.getElementById('totalMovies').textContent = this.filteredMovies.length;
+            }
+
+            // 设置事件监听器
+            setupEventListeners() {
+                // 排序选择
+                document.getElementById('sortSelect').addEventListener('change', (e) => {
+                    this.sortOrder = e.target.value;
+                    this.applySorting();
+                    this.currentPage = 1;
+                    this.renderMovies();
+                    this.renderPagination();
+                });
+
+                // 上一页/下一页按钮
+                document.getElementById('prevPage').addEventListener('click', () => {
+                    if (this.currentPage > 1) {
+                        this.goToPage(this.currentPage - 1);
+                    }
+                });
+
+                document.getElementById('nextPage').addEventListener('click', () => {
+                    const totalPages = Math.ceil(this.filteredMovies.length / this.itemsPerPage);
+                    if (this.currentPage < totalPages) {
+                        this.goToPage(this.currentPage + 1);
+                    }
+                });
+            }
+
+            // 渲染评分表格
+            renderRatingTable() {
+                const tableBody = document.getElementById('ratingTable');
+                tableBody.innerHTML = '';
+
+                sampleRatings.forEach(rating => {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white border-b hover:bg-gray-50';
+
+                    // 查找对应的电影名称
+                    const movie = this.movies.find(m => m.MOVIE_ID === rating.MOVIE_ID);
+                    const movieName = movie ? movie.NAME : `电影ID: ${rating.MOVIE_ID}`;
+
+                    row.innerHTML = `
+                            <td class="px-4 py-3 font-medium text-gray-900">
+                                ${movieName}
+                            </td>
+                            <td class="px-4 py-3 text-gray-700">
+                                <span class="font-mono text-xs">${rating.USER_MD5.substring(0, 8)}...</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${rating.RATING >= 4 ? 'bg-green-100 text-green-800' :
+                            rating.RATING >= 3 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
                         }">
-                            ${rating.RATING}星
-                        </span>
-                    </td>
-                    <td class="px-2 py-2 text-gray-500">${rating.RATING_TIME}</td>
-                `;
-            });
+                                    ${rating.RATING}星
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-gray-500">${rating.RATING_TIME}</td>
+                        `;
+
+                    tableBody.appendChild(row);
+                });
+            }
         }
 
         // 创建图表
@@ -471,6 +786,62 @@
                 }
             });
 
+            // 电影类型评分数量柱状图（DOUBAN_VOTES）
+            const genreVotesCtx = document.getElementById('genreVotesChart').getContext('2d');
+            new Chart(genreVotesCtx, {
+                type: 'bar',
+                data: {
+                    labels: visualizationData.genreRatingRelation.labels,
+                    datasets: [{
+                        label: '评分数量',
+                        data: visualizationData.genreRatingRelation.votes, // 使用评分数量数据
+                        backgroundColor: 'rgba(249, 115, 22, 0.7)', // 保持与类型评分图表一致的橙色系
+                        borderColor: 'rgba(249, 115, 22, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `评分数量: ${context.raw.toLocaleString()}`; // 格式化数字显示
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '总评分数量'
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    // 大数值简写（如10k代表10000）
+                                    return value >= 10000 ? (value / 10000) + 'w' :
+                                        value >= 1000 ? (value / 1000) + 'k' : value;
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
             // 导演评分关系柱状图
             const directorRatingCtx = document.getElementById('directorRatingChart').getContext('2d');
             new Chart(directorRatingCtx, {
@@ -507,6 +878,61 @@
                 }
             });
 
+            // 导演评分数量柱状图（DOUBAN_VOTES）
+            const directorVotesCtx = document.getElementById('directorVotesChart').getContext('2d');
+            new Chart(directorVotesCtx, {
+                type: 'bar',
+                data: {
+                    labels: visualizationData.directorRatingRelation.labels,
+                    datasets: [{
+                        label: '评分数量',
+                        data: visualizationData.directorRatingRelation.votes, // 使用评分数量数据
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)', // 保持与导演评分图表一致的红色系
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `评分数量: ${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '总评分数量'
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    return value >= 10000 ? (value / 10000) + 'w' :
+                                        value >= 1000 ? (value / 1000) + 'k' : value;
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
             // 演员评分关系柱状图
             const actorRatingCtx = document.getElementById('actorRatingChart').getContext('2d');
             new Chart(actorRatingCtx, {
@@ -537,6 +963,61 @@
                         x: {
                             ticks: {
                                 maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 演员评分数量柱状图（DOUBAN_VOTES）
+            const actorVotesCtx = document.getElementById('actorVotesChart').getContext('2d');
+            new Chart(actorVotesCtx, {
+                type: 'bar',
+                data: {
+                    labels: visualizationData.actorRatingRelation.labels,
+                    datasets: [{
+                        label: '评分数量',
+                        data: visualizationData.actorRatingRelation.votes, // 使用评分数量数据
+                        backgroundColor: 'rgba(99, 102, 241, 0.7)', // 保持与演员评分图表一致的靛蓝色系
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `评分数量: ${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '总评分数量'
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    return value >= 10000 ? (value / 10000) + 'w' :
+                                        value >= 1000 ? (value / 1000) + 'k' : value;
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
                             }
                         }
                     }
@@ -630,8 +1111,11 @@
         }
 
         // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            populateTables();
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化电影展示系统
+            window.movieSystem = new MovieDisplaySystem();
+
+            // 创建图表
             createCharts();
             createNetworkChart();
         });
